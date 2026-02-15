@@ -1,0 +1,23 @@
+# render.yaml
+services:
+  # Backend API
+  - type: web
+    name: llm-comparison-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api_server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    healthCheckPath: /api/health
+
+  # Frontend Static Site
+  - type: web
+    name: llm-comparison-frontend
+    runtime: static
+    buildCommand: echo "No build needed"
+    staticPublishPath: .
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /llm-comparison-standalone.html
