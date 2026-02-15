@@ -18,6 +18,8 @@ API Endpoints:
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict, Any, Literal
@@ -38,6 +40,12 @@ app = FastAPI(
     description="Compare PDF parsing across multiple LLM models",
     version="2.0.0"
 )
+
+app.mount("/static", StaticFiles(directory="."), name="static")
+
+@app.get("/")
+async def serve_frontend():
+    return FileResponse("llm-comparison-standalone_12.html")
 
 # Enable CORS
 app.add_middleware(
