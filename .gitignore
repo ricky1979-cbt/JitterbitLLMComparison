@@ -1,0 +1,14 @@
+# .gitignore
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+.venv
+*.log
+.DS_Store
+*.swp
+node_modules/
