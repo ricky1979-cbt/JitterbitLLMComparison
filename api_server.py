@@ -145,8 +145,6 @@ class ComparisonResponse(BaseModel):
     best_cost: Optional[str] = None
     best_accuracy: Optional[str] = None
 
-const [apiEndpoint, setApiEndpoint] = useState('https://jitterbitllmcomparison-02c3.onrender.com');
-
 # ============================================================================
 # Model Registry
 # ============================================================================
