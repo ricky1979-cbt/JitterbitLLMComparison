@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jitterbit AI Assistant - Find Your Perfect Use Case</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes typing {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        .typing-indicator span {
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        // Icon components
+        const MessageCircle = () => <i data-lucide="message-circle"></i>;
+        const Send = () => <i data-lucide="send"></i>;
+        const Sparkles = () => <i data-lucide="sparkles"></i>;
+        const ArrowRight = () => <i data-lucide="arrow-right"></i>;
+        const CheckCircle = () => <i data-lucide="check-circle"></i>;
+        const FileText = () => <i data-lucide="file-text"></i>;
+        const Bot = () => <i data-lucide="bot"></i>;
+        const User = () => <i data-lucide="user"></i>;
+
+        const AIAssistantChat = () => {
+            const [messages, setMessages] = useState([]);
+            const [inputValue, setInputValue] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const [currentStep, setCurrentStep] = useState('welcome');
+            const [userIndustry, setUserIndustry] = useState('');
+            const [selectedUseCase, setSelectedUseCase] = useState(null);
+            const messagesEndRef = useRef(null);
+
+            // Production API endpoint
+            const apiEndpoint = 'https://jitterbitllmcomparison-p0qq.onrender.com';
+
+            // Use cases database
+            const useCasesByIndustry = {
+                'finance': [
+                    { id: 'invoice', title: 'Invoice Processing', description: 'Extract data from invoices, receipts, and financial documents', docs: 'invoices, receipts, payment records' },
+                    { id: 'kyc', title: 'KYC Document Verification', description: 'Parse identity documents, bank statements, and compliance forms', docs: 'ID cards, passports, bank statements' },
+                    { id: 'contracts', title: 'Contract Analysis', description: 'Extract terms, dates, and obligations from legal contracts', docs: 'contracts, agreements, terms' }
+                ],
+                'healthcare': [
+                    { id: 'medical', title: 'Medical Records Processing', description: 'Extract patient data, diagnoses, and treatment information', docs: 'medical reports, lab results, prescriptions' },
+                    { id: 'insurance', title: 'Insurance Claims', description: 'Process insurance forms, claims, and medical bills', docs: 'claim forms, EOBs, medical bills' },
+                    { id: 'scheduling', title: 'Appointment Forms', description: 'Parse patient intake forms and scheduling documents', docs: 'intake forms, appointment sheets' }
+                ],
+                'retail': [
+                    { id: 'purchase', title: 'Purchase Orders', description: 'Extract order details, quantities, and pricing', docs: 'purchase orders, requisitions' },
+                    { id: 'inventory', title: 'Inventory Management', description: 'Process stock lists, manifests, and delivery notes', docs: 'packing slips, manifests, inventory lists' },
+                    { id: 'returns', title: 'Returns Processing', description: 'Parse return forms and refund requests', docs: 'return forms, RMA documents' }
+                ],
+                'legal': [
+                    { id: 'contracts', title: 'Contract Review', description: 'Analyze contracts, agreements, and legal documents', docs: 'contracts, NDAs, agreements' },
+                    { id: 'discovery', title: 'eDiscovery', description: 'Extract relevant information from legal documents', docs: 'court filings, depositions, evidence' },
+                    { id: 'compliance', title: 'Compliance Documents', description: 'Parse regulatory filings and compliance forms', docs: 'compliance reports, regulatory forms' }
+                ],
+                'manufacturing': [
+                    { id: 'quality', title: 'Quality Reports', description: 'Extract data from inspection reports and test results', docs: 'inspection reports, test certificates' },
+                    { id: 'specifications', title: 'Technical Specifications', description: 'Parse product specs, blueprints, and technical docs', docs: 'spec sheets, blueprints, manuals' },
+                    { id: 'maintenance', title: 'Maintenance Records', description: 'Process work orders and maintenance logs', docs: 'work orders, maintenance logs' }
+                ],
+                'education': [
+                    { id: 'transcripts', title: 'Academic Transcripts', description: 'Extract student records, grades, and course information', docs: 'transcripts, report cards' },
+                    { id: 'applications', title: 'Application Forms', description: 'Process admissions forms and applications', docs: 'application forms, enrollment docs' },
+                    { id: 'certificates', title: 'Certificates & Diplomas', description: 'Parse educational certificates and credentials', docs: 'diplomas, certificates, credentials' }
+                ],
+                'other': [
+                    { id: 'forms', title: 'Form Processing', description: 'Extract data from any structured forms', docs: 'application forms, surveys, registrations' },
+                    { id: 'reports', title: 'Report Analysis', description: 'Parse business reports and analytical documents', docs: 'reports, analytics, summaries' },
+                    { id: 'general', title: 'General Document Parsing', description: 'Extract text and data from any document type', docs: 'any PDF documents' }
+                ]
+            };
+
+            const industryOptions = [
+                { id: 'finance', label: 'Finance & Banking', emoji: '💰' },
+                { id: 'healthcare', label: 'Healthcare', emoji: '🏥' },
+                { id: 'retail', label: 'Retail & E-commerce', emoji: '🛒' },
+                { id: 'legal', label: 'Legal', emoji: '⚖️' },
+                { id: 'manufacturing', label: 'Manufacturing', emoji: '🏭' },
+                { id: 'education', label: 'Education', emoji: '🎓' },
+                { id: 'other', label: 'Other / General', emoji: '📄' }
+            ];
+
+            // Scroll to bottom when messages change
+            useEffect(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [messages, isTyping]);
+
+            // Initialize Lucide icons
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, [messages, isTyping]);
+
+            // Add initial welcome message
+            useEffect(() => {
+                setTimeout(() => {
+                    addBotMessage(
+                        "👋 Welcome to Jitterbit's AI Assistant! I'm here to help you discover how AI can transform your document processing.\n\nLet's find the perfect use case for you. What industry do you work in?",
+                        industryOptions.map(ind => ({
+                            id: ind.id,
+                            label: `${ind.emoji} ${ind.label}`,
+                            description: null
+                        }))
+                    );
+                }, 500);
+            }, []);
+
+            const addBotMessage = (content, options = null) => {
+                const newMessage = {
+                    id: Date.now(),
+                    type: 'bot',
+                    content,
+                    options,
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, newMessage]);
+            };
+
+            const addUserMessage = (content) => {
+                const newMessage = {
+                    id: Date.now(),
+                    type: 'user',
+                    content,
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, newMessage]);
+            };
+
+            const simulateTyping = (duration = 1000) => {
+                setIsTyping(true);
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        setIsTyping(false);
+                        resolve();
+                    }, duration);
+                });
+            };
+
+            const handleIndustrySelect = async (industry) => {
+                const selected = industryOptions.find(i => i.id === industry);
+                addUserMessage(`${selected.emoji} ${selected.label}`);
+                setUserIndustry(industry);
+                setCurrentStep('use-case');
+
+                await simulateTyping(1500);
+
+                const useCases = useCasesByIndustry[industry];
+                addBotMessage(
+                    `Great! I found ${useCases.length} AI use cases perfect for ${selected.label}. Which one interests you the most?`,
+                    useCases.map(uc => ({
+                        id: uc.id,
+                        label: uc.title,
+                        description: uc.description
+                    }))
+                );
+            };
+
+            const handleUseCaseSelect = async (useCaseId) => {
+                const useCase = useCasesByIndustry[userIndustry].find(uc => uc.id === useCaseId);
+                addUserMessage(useCase.title);
+                setSelectedUseCase(useCase);
+                setCurrentStep('confirm');
+
+                await simulateTyping(1500);
+
+                addBotMessage(
+                    `Excellent choice! **${useCase.title}** is a powerful use case.\n\n${useCase.description}\n\n**Perfect for:** ${useCase.docs}\n\nWould you like to see which AI model works best for your ${useCase.docs.split(',')[0]}?`,
+                    [
+                        { id: 'test', label: '🚀 Yes, let\'s test it!', primary: true },
+                        { id: 'learn', label: '📖 Tell me more first' }
+                    ]
+                );
+            };
+
+            const handleConfirmAction = async (action) => {
+                if (action === 'test') {
+                    addUserMessage('🚀 Yes, let\'s test it!');
+                    await simulateTyping(1000);
+                    
+                    addBotMessage(
+                        `Perfect! I'm taking you to the **Jitterbit LLM Arena** where you can:\n\n✅ Upload your ${selectedUseCase.docs.split(',')[0]}\n✅ Compare Claude, GPT-4, and other AI models\n✅ See which one gives you the best results\n✅ View actual costs and accuracy\n\nReady to discover the perfect AI for your documents?`,
+                        [
+                            { id: 'go', label: '➡️ Take me to LLM Arena', primary: true }
+                        ]
+                    );
+                    setCurrentStep('redirect');
+                } else {
+                    addUserMessage('📖 Tell me more first');
+                    await simulateTyping(1500);
+                    
+                    addBotMessage(
+                        `**${selectedUseCase.title}** helps you:\n\n` +
+                        `• **Automate** manual data entry from ${selectedUseCase.docs}\n` +
+                        `• **Extract** key information in seconds\n` +
+                        `• **Compare** different AI models to find what works best\n` +
+                        `• **Save** hours of manual processing time\n\n` +
+                        `The LLM Arena lets you test this with your actual documents - no commitment required!\n\n` +
+                        `Ready to try it?`,
+                        [
+                            { id: 'test', label: '🚀 Yes, let\'s test it!', primary: true }
+                        ]
+                    );
+                }
+            };
+
+            const handleRedirect = () => {
+                addUserMessage('➡️ Take me to LLM Arena');
+                // Redirect to LLM Arena page
+                window.location.href = '/arena';
+            };
+
+            const handleOptionClick = async (optionId) => {
+                if (currentStep === 'welcome') {
+                    await handleIndustrySelect(optionId);
+                } else if (currentStep === 'use-case') {
+                    await handleUseCaseSelect(optionId);
+                } else if (currentStep === 'confirm') {
+                    await handleConfirmAction(optionId);
+                } else if (currentStep === 'redirect') {
+                    handleRedirect();
+                }
+            };
+
+            const handleSendMessage = async () => {
+                if (!inputValue.trim()) return;
+
+                const userText = inputValue;
+                setInputValue('');
+                addUserMessage(userText);
+
+                await simulateTyping();
+
+                // Simple fallback response
+                addBotMessage(
+                    "I'm here to help you find the right AI use case! Please select from the options above, or let me know if you'd like to explore a different industry.",
+                    currentStep === 'welcome' ? null : [
+                        { id: 'restart', label: '🔄 Start over' }
+                    ]
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-slate-900">
+                    {/* Header */}
+                    <header className="bg-white/10 backdrop-blur-sm border-b border-white/20">
+                        <div className="max-w-6xl mx-auto px-4 py-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                                        <span className="text-white font-bold text-xl">J</span>
+                                    </div>
+                                    <div>
+                                        <h1 className="text-xl font-bold text-white">Jitterbit AI Assistant</h1>
+                                        <p className="text-sm text-purple-200">Find Your Perfect AI Use Case</p>
+                                    </div>
+                                </div>
+                                <div className="hidden md:flex items-center gap-2 text-sm text-purple-200">
+                                    <Sparkles className="w-4 h-4" />
+                                    <span>Powered by AI</span>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Chat Container */}
+                    <div className="max-w-4xl mx-auto px-4 py-8">
+                        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden" style={{ height: 'calc(100vh - 200px)' }}>
+                            {/* Messages */}
+                            <div className="h-full flex flex-col">
+                                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                                    {messages.map((message) => (
+                                        <div key={message.id} className="message-fade-in">
+                                            <div className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                                {message.type === 'bot' && (
+                                                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                                                        <Bot className="w-5 h-5 text-white" />
+                                                    </div>
+                                                )}
+                                                
+                                                <div className={`max-w-2xl ${message.type === 'user' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-900'} rounded-2xl px-4 py-3`}>
+                                                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                                                        {message.content}
+                                                    </div>
+                                                    
+                                                    {message.options && (
+                                                        <div className="mt-4 space-y-2">
+                                                            {message.options.map((option) => (
+                                                                <button
+                                                                    key={option.id}
+                                                                    onClick={() => handleOptionClick(option.id)}
+                                                                    className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                                                                        option.primary 
+                                                                            ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 font-semibold' 
+                                                                            : 'bg-white border-2 border-slate-200 hover:border-purple-400 text-slate-700'
+                                                                    }`}
+                                                                >
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="flex-1">
+                                                                            <div className="font-medium">{option.label}</div>
+                                                                            {option.description && (
+                                                                                <div className="text-xs opacity-75 mt-1">{option.description}</div>
+                                                                            )}
+                                                                        </div>
+                                                                        <ArrowRight className="w-4 h-4 ml-2" />
+                                                                    </div>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {message.type === 'user' && (
+                                                    <div className="flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                                                        <User className="w-5 h-5 text-white" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {isTyping && (
+                                        <div className="flex gap-3 message-fade-in">
+                                            <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                                                <Bot className="w-5 h-5 text-white" />
+                                            </div>
+                                            <div className="bg-slate-100 rounded-2xl px-4 py-3">
+                                                <div className="typing-indicator flex gap-1">
+                                                    <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                                                    <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                                                    <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div ref={messagesEndRef} />
+                                </div>
+
+                                {/* Input */}
+                                <div className="border-t border-slate-200 p-4 bg-slate-50">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={inputValue}
+                                            onChange={(e) => setInputValue(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                                            placeholder="Type a message or use the options above..."
+                                            className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                            disabled={isTyping}
+                                        />
+                                        <button
+                                            onClick={handleSendMessage}
+                                            disabled={!inputValue.trim() || isTyping}
+                                            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                        >
+                                            <Send className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-2 text-center">
+                                        Select from the options above for best results
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer Note */}
+                        <div className="text-center mt-6 text-sm text-purple-200">
+                            <p>🔒 This conversation is not stored. Your privacy is protected.</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(<AIAssistantChat />, document.getElementById('root'));
+
+        // Initialize Lucide icons
+        setTimeout(() => {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }, 100);
+    </script>
+</body>
+</html>
