@@ -41,11 +41,6 @@ app = FastAPI(
     version="2.0.0"
 )
 
-app.mount("/static", StaticFiles(directory="."), name="static")
-
-@app.get("/")
-async def serve_frontend():
-    return FileResponse("llm-comparison-standalone.html")
 
 # Enable CORS
 app.add_middleware(
