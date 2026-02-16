@@ -45,7 +45,7 @@ app.mount("/static", StaticFiles(directory="."), name="static")
 
 @app.get("/")
 async def serve_frontend():
-    return FileResponse("llm-comparison-standalone_12.html")
+    return FileResponse("llm-comparison-standalone.html")
 
 # Enable CORS
 app.add_middleware(
