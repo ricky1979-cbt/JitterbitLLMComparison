@@ -875,7 +875,19 @@
                                 </div>
                             </>
                         )}
-
+                         {/* Terms */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-5 mb-6">
+                            <h3 className="font-semibold text-slate-900 mb-2">Terms of Service</h3>
+                            <div className="text-sm text-slate-700">
+                                <p className="mb-2">By using this tool, you agree to:</p>
+                                <ul className="list-disc list-inside ml-2 space-y-1">
+                                    <li>Not upload confidential or sensitive data</li>
+                                    <li>Comply with all applicable laws</li>
+                                    <li>Accept third-party LLM provider terms</li>
+                                </ul>
+                                <p className="mt-3 text-xs text-slate-500">Questions? <a href="mailto:privacy@jitterbit.com" className="text-purple-600 hover:underline">privacy@jitterbit.com</a></p>
+                            </div>
+                        </div>
                         {/* Instructions */}
                         {results.length === 0 && !isRunning && (
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
