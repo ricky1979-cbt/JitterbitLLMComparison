@@ -8,8 +8,9 @@ python-multipart==0.0.6
 # HTTP Client
 httpx==0.26.0
 
-# Data Validation
-pydantic==2.5.3
+# Data Validation - Updated for Python 3.11+ compatibility
+pydantic==2.10.5
+pydantic-core==2.27.2
 
 # PDF Processing
 pypdf==3.17.4
