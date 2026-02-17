@@ -59,6 +59,10 @@
             const [debugInfo, setDebugInfo] = useState('');
             const [anthropicApiKey, setAnthropicApiKey] = useState('');
             const [openaiApiKey, setOpenaiApiKey] = useState('');
+            
+            // Production API endpoint - hardcoded
+            const apiEndpoint = 'https://jitterbitllmcomparison-p0qq.onrender.com';
+            
             const [selectedModels, setSelectedModels] = useState({
                 'claude-sonnet-4-20250514': true,
             });
@@ -74,9 +78,6 @@
                 output_cost_per_1m: 0
             });
             const [customModels, setCustomModels] = useState({});
-
-            // Production API endpoint - hardcoded
-            const apiEndpoint = 'https://jitterbitllmcomparison-p0qq.onrender.com';
 
             // Available models
             const availableModels = {
@@ -350,14 +351,24 @@
                                         <p className="text-slate-600 mt-1">Test PDF parsing across multiple AI models - Compare speed, accuracy, and cost</p>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-sm text-slate-500">Powered by</p>
-                                    <p className="text-lg font-semibold text-purple-600">Jitterbit</p>
+                                <div className="text-right flex flex-col items-end gap-3">
+                                    <div>
+                                        <p className="text-sm text-slate-500">Powered by</p>
+                                        <p className="text-lg font-semibold text-purple-600">Jitterbit</p>
+                                    </div>
+                                    <a
+                                        href="https://www.jitterbit.com/contact-us/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                                    >
+                                        Contact Us
+                                    </a>
                                 </div>
                             </div>
                         </div>
 
-                        {/* API Configuration */}
+                        {/* API Keys Configuration */}
                         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
                             <h2 className="text-xl font-semibold mb-4">API Keys Configuration</h2>
                             <div className="space-y-4">
@@ -392,6 +403,59 @@
                                         Get your key from <a href="https://platform.openai.com/" target="_blank" className="text-purple-600 hover:underline">platform.openai.com</a>
                                     </p>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Privacy Notice */}
+                        <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-5 mb-6">
+                            <div className="flex items-start gap-3">
+                                <Info className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+                                <div className="flex-1">
+                                    <h3 className="font-semibold text-blue-900 mb-2">Privacy &amp; Data Security</h3>
+                                    <div className="text-sm text-blue-800 space-y-1">
+                                        <p className="font-medium">Your documents are safe:</p>
+                                        <ul className="list-disc list-inside ml-2 space-y-1">
+                                            <li>Processed in memory only (2-10 seconds)</li>
+                                            <li>Never written to disk or database</li>
+                                            <li>Deleted immediately after processing</li>
+                                        </ul>
+                                        <p className="mt-2 text-xs">Documents are sent to third-party LLM APIs for parsing. See: <a href="https://www.anthropic.com/legal/privacy" target="_blank" className="underline">Anthropic Privacy</a>, <a href="https://openai.com/policies/privacy-policy" target="_blank" className="underline">OpenAI Privacy</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Disclaimer */}
+                        <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-5 mb-6">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle className="w-6 h-6 text-yellow-700 flex-shrink-0 mt-0.5" />
+                                <div className="flex-1">
+                                    <h3 className="font-semibold text-yellow-900 mb-2">Do Not Upload Sensitive Data</h3>
+                                    <div className="text-sm text-yellow-800">
+                                        <p className="font-medium mb-1">Do NOT upload documents containing:</p>
+                                        <ul className="list-disc list-inside ml-2 space-y-1">
+                                            <li>Personal Health Information (PHI)</li>
+                                            <li>Social Security Numbers or IDs</li>
+                                            <li>Payment card information</li>
+                                            <li>Highly confidential data</li>
+                                        </ul>
+                                        <p className="mt-2 font-medium">Use test documents only</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Terms */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-5 mb-6">
+                            <h3 className="font-semibold text-slate-900 mb-2">Terms of Service</h3>
+                            <div className="text-sm text-slate-700">
+                                <p className="mb-2">By using this tool, you agree to:</p>
+                                <ul className="list-disc list-inside ml-2 space-y-1">
+                                    <li>Not upload confidential or sensitive data</li>
+                                    <li>Comply with all applicable laws</li>
+                                    <li>Accept third-party LLM provider terms</li>
+                                </ul>
+                                <p className="mt-3 text-xs text-slate-500">Questions? <a href="mailto:privacy@jitterbit.com" className="text-purple-600 hover:underline">privacy@jitterbit.com</a></p>
                             </div>
                         </div>
 
@@ -875,19 +939,7 @@
                                 </div>
                             </>
                         )}
-                         {/* Terms */}
-                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-5 mb-6">
-                            <h3 className="font-semibold text-slate-900 mb-2">Terms of Service</h3>
-                            <div className="text-sm text-slate-700">
-                                <p className="mb-2">By using this tool, you agree to:</p>
-                                <ul className="list-disc list-inside ml-2 space-y-1">
-                                    <li>Not upload confidential or sensitive data</li>
-                                    <li>Comply with all applicable laws</li>
-                                    <li>Accept third-party LLM provider terms</li>
-                                </ul>
-                                <p className="mt-3 text-xs text-slate-500">Questions? <a href="mailto:privacy@jitterbit.com" className="text-purple-600 hover:underline">privacy@jitterbit.com</a></p>
-                            </div>
-                        </div>
+
                         {/* Instructions */}
                         {results.length === 0 && !isRunning && (
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
@@ -896,7 +948,8 @@
                                     How to Use
                                 </h3>
                                 <ol className="list-decimal list-inside space-y-2 text-blue-800 text-sm">
-                                    <li>Provide your OpenAI and/or Claude API Keys</li>
+                                    <li>Make sure your API server is running (python api_server.py)</li>
+                                    <li>Configure the API endpoint if it's not localhost:8000</li>
                                     <li>Upload a PDF document you want to test</li>
                                     <li>Select which models you want to compare</li>
                                     <li>Click "Run Comparison" to start testing</li>
